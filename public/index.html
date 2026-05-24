@@ -189,7 +189,40 @@ tr.baja-row { background: rgba(231,76,60,0.06); }
 @media (max-width: 768px) {
     .layout { grid-template-columns: 1fr; }
     .sidebar { border-right: none; border-bottom: 1px solid var(--borde); }
+    .excel-grupos-grid { grid-template-columns: 1fr; }
 }
+
+/* VISTA EXCEL */
+.excel-titulo { font-family: 'Bebas Neue', sans-serif; font-size: clamp(1.4rem,3vw,2.2rem); letter-spacing: 4px; text-align: center; padding: 14px; background: linear-gradient(90deg, #1a3a6e, #2563b0, #1a3a6e); color: #fff; border-radius: 8px 8px 0 0; border: 1px solid #2563b0; margin-bottom: 0; }
+.excel-segmento-header { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 3px; padding: 8px 14px; text-align: center; border: 1px solid var(--borde); border-top: none; margin-bottom: 16px; }
+.seg-header-primera { background: rgba(241,196,15,0.12); color: var(--primera); border-color: rgba(241,196,15,0.3); }
+.seg-header-ascenso { background: rgba(52,152,219,0.12); color: var(--azul); border-color: rgba(52,152,219,0.3); }
+.seg-header-basicas { background: rgba(149,165,166,0.12); color: var(--basicas); border-color: rgba(149,165,166,0.3); }
+.excel-grupos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(480px, 1fr)); gap: 20px; margin-bottom: 28px; }
+.excel-grupo { background: var(--card); border: 1px solid var(--borde); border-radius: 8px; overflow: hidden; }
+.excel-grupo-titulo { background: #1a3a6e; color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 0.95rem; letter-spacing: 2px; padding: 7px 12px; border-bottom: 2px solid #2563b0; display: flex; justify-content: space-between; align-items: center; }
+.excel-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+.excel-table th { background: #1f2937; color: var(--texto2); padding: 6px 4px; text-align: center; border: 1px solid var(--borde); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap; }
+.excel-table th.th-nombre { text-align: left; padding-left: 8px; min-width: 110px; }
+.excel-table th.th-pts { background: #162032; color: var(--amarillo); }
+.excel-table th.th-pi { background: #162032; width: 28px; }
+.excel-table td { border: 1px solid var(--borde); padding: 5px 4px; text-align: center; vertical-align: middle; }
+.excel-table td.td-no { color: var(--texto2); font-size: 0.7rem; }
+.excel-table td.td-nombre { text-align: left; padding-left: 8px; font-weight: 500; white-space: nowrap; font-size: 0.78rem; }
+.excel-table td.td-pts { font-weight: 700; color: var(--amarillo); background: rgba(241,196,15,0.05); }
+.excel-table td.td-num { color: var(--texto2); font-size: 0.72rem; }
+.celda-diagonal { background: #111; }
+.celda-gano { background: rgba(46,204,113,0.08); color: var(--verde); font-weight: 600; font-size: 0.72rem; white-space: nowrap; }
+.celda-perdio { background: rgba(231,76,60,0.06); color: #c0392b; font-size: 0.72rem; white-space: nowrap; }
+.celda-wo-gano { background: rgba(52,152,219,0.1); color: var(--azul); font-size: 0.7rem; font-weight: 600; }
+.celda-wo-perdio { background: rgba(52,152,219,0.05); color: #7fb3d3; font-size: 0.7rem; }
+.celda-def-gano { background: rgba(231,76,60,0.1); color: var(--rojo); font-size: 0.7rem; font-weight: 600; }
+.celda-def-perdio { background: rgba(231,76,60,0.05); color: #e07070; font-size: 0.7rem; }
+.celda-nr { background: rgba(100,100,100,0.1); color: var(--texto2); font-size: 0.68rem; font-style: italic; }
+.celda-vacio { background: var(--card2); }
+.pi-sube { background: #27ae60; color: #fff; font-weight: 700; font-size: 0.75rem; }
+.pi-queda { background: #f39c12; color: #fff; font-weight: 700; font-size: 0.75rem; }
+.pi-baja { background: #c0392b; color: #fff; font-weight: 700; font-size: 0.75rem; }
 </style>
 </head>
 <body>
@@ -273,10 +306,24 @@ tr.baja-row { background: rgba(231,76,60,0.06); }
 
     <div class="tabs">
         <div class="tab active" data-tab="tabla">📊 Tablas</div>
+        <div class="tab" data-tab="excel">📋 Vista Excel</div>
         <div class="tab" data-tab="partidos">🎾 Partidos</div>
         <div class="tab" data-tab="movimientos">⬆⬇ Movimientos</div>
         <div class="tab" data-tab="ranking">🏆 Ranking Global</div>
         <div class="tab" data-tab="post">🔮 Próximo mes</div>
+    </div>
+
+    <!-- TAB: VISTA EXCEL -->
+    <div class="tab-content" id="tab-excel">
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+            <button class="btn btn-sm btn-secondary" onclick="filtrarExcel('todos')">Todos</button>
+            <button class="btn btn-sm" style="background:rgba(241,196,15,0.1);border:1px solid var(--primera);color:var(--primera)" onclick="filtrarExcel('Primera División')">Primera División</button>
+            <button class="btn btn-sm" style="background:rgba(52,152,219,0.1);border:1px solid var(--azul);color:var(--azul)" onclick="filtrarExcel('Liga de Ascenso')">Liga de Ascenso</button>
+            <button class="btn btn-sm" style="background:rgba(149,165,166,0.1);border:1px solid var(--basicas);color:var(--basicas)" onclick="filtrarExcel('Fuerzas Básicas')">Fuerzas Básicas</button>
+        </div>
+        <div id="excel-container">
+            <div class="empty"><div class="icon">📋</div><p>Corre la simulación para ver la vista Excel</p></div>
+        </div>
     </div>
 
     <!-- TAB: TABLAS -->
@@ -423,7 +470,7 @@ document.getElementById('btn-simular').addEventListener('click', async () => {
             <div style="display:flex;justify-content:space-between"><span style="color:var(--texto2)">❓ No reportados</span><strong>${s.no_reportados}</strong></div>
         `
 
-        await Promise.all([cargarTablas(), cargarPartidos(), cargarRanking()])
+        await Promise.all([cargarTablas(), cargarPartidos(), cargarRanking(), cargarExcel()])
         toast('✅ Simulación completada — ' + s.total + ' partidos')
     } catch(e) {
         toast('Error: ' + e.message, 'error')
@@ -443,7 +490,7 @@ document.getElementById('btn-movimientos').addEventListener('click', async () =>
         const res = await fetch('/api/movimientos', { method: 'POST' })
         const data = await res.json()
         tieneMovimientos = true
-        await Promise.all([cargarTablas(), cargarMovimientos(), cargarProximoMes()])
+        await Promise.all([cargarTablas(), cargarMovimientos(), cargarProximoMes(), cargarExcel()])
 
         // Cambiar al tab de movimientos
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
@@ -697,6 +744,118 @@ async function cargarProximoMes() {
     }
 
     document.getElementById('post-container').innerHTML = html
+}
+
+// ── Vista Excel ──
+let excelFiltroSeg = 'todos'
+
+function filtrarExcel(seg) {
+    excelFiltroSeg = seg
+    cargarExcel()
+}
+
+async function cargarExcel() {
+    const res = await fetch('/api/matriz')
+    const data = await res.json()
+    if (!data.grupos || !data.grupos.length) return
+
+    const grupos = excelFiltroSeg === 'todos'
+        ? data.grupos
+        : data.grupos.filter(g => g.segmento === excelFiltroSeg)
+
+    const segmentos_orden = ['Primera División', 'Liga de Ascenso', 'Fuerzas Básicas']
+    const segClaseMap = { 'Primera División': 'primera', 'Liga de Ascenso': 'ascenso', 'Fuerzas Básicas': 'basicas' }
+
+    let html = `<div class="excel-titulo">MEGA VARONIL 2026</div>`
+
+    for (const seg of segmentos_orden) {
+        const gs = grupos.filter(g => g.segmento === seg)
+        if (!gs.length) continue
+
+        const clSeg = segClaseMap[seg]
+        html += `<div class="excel-segmento-header seg-header-${clSeg}">${seg}</div>`
+        html += `<div class="excel-grupos-grid">`
+
+        for (const g of gs) {
+            const n = g.jugadores.length
+            // Headers de columnas cruzadas (número del rival)
+            const col_headers = g.jugadores.map((_, i) => `<th>${i+1}</th>`).join('')
+
+            const filas_html = g.filas.map(fila => {
+                const celdas_html = fila.celdas.map(c => {
+                    if (c.tipo === 'diagonal') return `<td class="celda-diagonal"></td>`
+                    if (c.tipo === 'vacio')    return `<td class="celda-vacio"></td>`
+                    if (c.tipo === 'no_reportado') return `<td class="celda-nr">N/R</td>`
+                    if (c.tipo === 'walkover') {
+                        return c.gano
+                            ? `<td class="celda-wo-gano">W.O.</td>`
+                            : `<td class="celda-wo-perdio">W.O.</td>`
+                    }
+                    if (c.tipo === 'default') {
+                        return c.gano
+                            ? `<td class="celda-def-gano">DEF</td>`
+                            : `<td class="celda-def-perdio">DEF</td>`
+                    }
+                    // jugado
+                    return c.gano
+                        ? `<td class="celda-gano">${c.sets}</td>`
+                        : `<td class="celda-perdio">${c.sets}</td>`
+                }).join('')
+
+                const piClass = fila.movimiento === 'sube' ? 'pi-sube' : fila.movimiento === 'baja' ? 'pi-baja' : 'pi-queda'
+                const piLabel = fila.movimiento === 'sube' ? fila.pos : fila.movimiento === 'baja' ? fila.pos : fila.pos
+
+                return `<tr>
+                    <td class="td-no">${fila.pos}</td>
+                    <td class="td-nombre">${fila.nombre}</td>
+                    ${celdas_html}
+                    <td class="td-num">${fila.jg}</td>
+                    <td class="td-num">${fila.jp}</td>
+                    <td class="td-pts">${fila.pts}</td>
+                    <td class="${piClass}">${piLabel}</td>
+                </tr>`
+            }).join('')
+
+            html += `<div class="excel-grupo">
+                <div class="excel-grupo-titulo">
+                    <span>${g.nombre}</span>
+                    <span style="font-size:0.72rem;opacity:0.7">${g.segmento}</span>
+                </div>
+                <div style="overflow-x:auto">
+                    <table class="excel-table">
+                        <thead>
+                            <tr>
+                                <th style="width:24px">No.</th>
+                                <th class="th-nombre">NOMBRE</th>
+                                ${col_headers}
+                                <th>JG</th>
+                                <th>JP</th>
+                                <th class="th-pts">PTS</th>
+                                <th class="th-pi">PI</th>
+                            </tr>
+                        </thead>
+                        <tbody>${filas_html}</tbody>
+                    </table>
+                </div>
+            </div>`
+        }
+
+        html += `</div>`
+    }
+
+    // Leyenda
+    html += `<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:0.78rem;color:var(--texto2);align-items:center">
+        <span><span style="display:inline-block;width:10px;height:10px;background:#27ae60;border-radius:2px;margin-right:4px"></span>PI verde = sube</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#f39c12;border-radius:2px;margin-right:4px"></span>PI amarillo = se queda</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#c0392b;border-radius:2px;margin-right:4px"></span>PI rojo = baja</span>
+        <span style="margin-left:12px"><span style="color:var(--verde);font-weight:700">6-4 6-2</span> = ganó</span>
+        <span><span style="color:#c0392b">6-4 6-2</span> = perdió</span>
+        <span><span style="color:var(--azul)">W.O.</span> = walkover</span>
+        <span><span style="color:var(--rojo)">DEF</span> = default</span>
+        <span><span style="color:var(--texto2);font-style:italic">N/R</span> = no reportado</span>
+    </div>`
+
+    document.getElementById('excel-container').innerHTML = html
 }
 
 // ── Helpers ──
