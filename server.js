@@ -117,6 +117,71 @@ app.get('/api/movimientos', (req, res) => {
     res.json({ movimientos: movimientosActuales })
 })
 
+// GET /api/matriz — matriz cruzada de marcadores por grupo (formato Excel)
+app.get('/api/matriz', (req, res) => {
+    if (!estadoActual) return res.json({ grupos: [] })
+
+    const nums = Object.keys(estadoActual.grupos).map(Number).sort((a,b) => a-b)
+    const grupos_data = []
+
+    for (const num of nums) {
+        const g = estadoActual.grupos[num]
+        const tabla = tablaOrdenada(g)
+        const n = tabla.length
+
+        // Construir mapa de resultados: "ganador|perdedor" → sets
+        const res_map = {}
+        for (const p of estadoActual.partidos.filter(p => p.grupo_num === num)) {
+            if (p.tipo === 'no_reportado') {
+                res_map[`${p.jugador_a}|${p.jugador_b}`] = { sets: 'N/R', tipo: 'no_reportado', gano: null }
+                res_map[`${p.jugador_b}|${p.jugador_a}`] = { sets: 'N/R', tipo: 'no_reportado', gano: null }
+            } else {
+                res_map[`${p.ganador}|${p.perdedor}`] = { sets: p.sets, tipo: p.tipo, gano: true }
+                res_map[`${p.perdedor}|${p.ganador}`] = { sets: p.sets, tipo: p.tipo, gano: false }
+            }
+        }
+
+        // Calcular movimiento de cada jugador
+        const mov_map = {}
+        for (const [nombre] of tabla) {
+            mov_map[nombre] = movimientoDeJugador(nombre, num)
+        }
+
+        const filas = tabla.map(([nombre, stats], i) => {
+            const celdas = tabla.map(([rival], j) => {
+                if (i === j) return { tipo: 'diagonal' }
+                const r = res_map[`${nombre}|${rival}`]
+                if (!r) return { tipo: 'vacio' }
+                return { sets: r.sets, tipo: r.tipo, gano: r.gano }
+            })
+            return {
+                pos: i + 1,
+                nombre,
+                celdas,
+                jg: stats.juegos_f,
+                jp: stats.juegos_c,
+                sets_f: stats.sets_f,
+                sets_c: stats.sets_c,
+                pts: stats.pts,
+                pg: stats.pg,
+                pp: stats.pp,
+                pj: stats.pj,
+                movimiento: mov_map[nombre],
+            }
+        })
+
+        grupos_data.push({
+            numero: num,
+            nombre: g.nombre,
+            segmento: segmentoDeGrupo(num),
+            jugadores: tabla.map(([n]) => n),
+            filas,
+        })
+    }
+
+    res.json({ grupos: grupos_data, segmentos: SEGMENTOS })
+})
+
 // GET /api/ranking — ranking global de 1 a 100 (basado en posición en grupo)
 app.get('/api/ranking', (req, res) => {
     if (!estadoActual) return res.json({ ranking: [] })
