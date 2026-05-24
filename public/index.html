@@ -1,1 +1,717 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎾 Simulador MEGA VARONIL 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0 }
+:root {
+    --verde: #2ecc71; --verde-d: #1a7a43; --verde-bg: #0d3b1e;
+    --amarillo: #f1c40f; --rojo: #e74c3c; --azul: #3498db;
+    --naranja: #e67e22;
+    --fondo: #0d1117; --card: #161b22; --card2: #1f2937;
+    --borde: #30363d; --texto: #e6edf3; --texto2: #8b949e;
+    --primera: #f1c40f; --ascenso: #3498db; --basicas: #95a5a6;
+}
+body { background: var(--fondo); color: var(--texto); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
 
+/* HEADER */
+.header { background: linear-gradient(135deg, #0d3b1e, #1a7a43, #0d3b1e); padding: 28px 24px 20px; text-align: center; border-bottom: 3px solid var(--verde); position: relative; overflow: hidden; }
+.header::before { content: '🎾'; position: absolute; font-size: 200px; opacity: 0.05; top: -30px; right: -30px; pointer-events: none; }
+.header h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2rem, 5vw, 3.5rem); letter-spacing: 4px; color: #fff; }
+.header .sub { color: var(--verde); font-size: 0.8rem; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; margin-top: 4px; }
+
+/* LAYOUT */
+.layout { display: grid; grid-template-columns: 280px 1fr; min-height: calc(100vh - 100px); }
+.sidebar { background: var(--card); border-right: 1px solid var(--borde); padding: 20px 16px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; }
+.main { padding: 20px; overflow-y: auto; }
+
+/* PANEL */
+.panel { background: var(--card2); border: 1px solid var(--borde); border-radius: 10px; overflow: hidden; }
+.panel-header { background: var(--verde-bg); border-bottom: 1px solid var(--borde); padding: 10px 14px; font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 2px; color: var(--verde); display: flex; align-items: center; gap: 8px; }
+.panel-body { padding: 14px; }
+
+/* SLIDERS */
+.slider-group { display: flex; flex-direction: column; gap: 10px; }
+.slider-row { display: flex; flex-direction: column; gap: 4px; }
+.slider-label { display: flex; justify-content: space-between; font-size: 0.8rem; }
+.slider-label span:first-child { color: var(--texto2); }
+.slider-label .val { font-weight: 700; font-size: 0.9rem; }
+.val-jugado { color: var(--verde); }
+.val-walkover { color: var(--azul); }
+.val-default { color: var(--rojo); }
+.val-no_reportado { color: var(--texto2); }
+input[type=range] { width: 100%; height: 4px; border-radius: 2px; outline: none; cursor: pointer; -webkit-appearance: none; background: var(--borde); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; cursor: pointer; }
+#sl-jugado::-webkit-slider-thumb { background: var(--verde); }
+#sl-walkover::-webkit-slider-thumb { background: var(--azul); }
+#sl-default::-webkit-slider-thumb { background: var(--rojo); }
+#sl-no-reportado::-webkit-slider-thumb { background: var(--texto2); }
+
+.total-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 8px; }
+.total-seg { transition: width 0.3s; }
+.seg-jugado { background: var(--verde); }
+.seg-walkover { background: var(--azul); }
+.seg-default { background: var(--rojo); }
+.seg-nr { background: var(--texto2); }
+
+/* NUMBER INPUTS */
+.num-row { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+.num-row label { font-size: 0.82rem; color: var(--texto2); }
+.num-row input[type=number] { width: 60px; background: var(--fondo); border: 1px solid var(--borde); border-radius: 6px; padding: 4px 8px; color: var(--texto); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; text-align: center; }
+
+/* BOTONES */
+.btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s; letter-spacing: 0.5px; }
+.btn-primary { background: var(--verde-d); border: 1px solid var(--verde); color: var(--verde); }
+.btn-primary:hover { background: var(--verde); color: #000; }
+.btn-secondary { background: transparent; border: 1px solid var(--borde); color: var(--texto2); }
+.btn-secondary:hover { border-color: var(--azul); color: var(--azul); }
+.btn-warning { background: transparent; border: 1px solid var(--amarillo); color: var(--amarillo); }
+.btn-warning:hover { background: var(--amarillo); color: #000; }
+.btn-danger { background: transparent; border: 1px solid var(--rojo); color: var(--rojo); }
+.btn-danger:hover { background: var(--rojo); color: #fff; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-sm { padding: 6px 12px; font-size: 0.8rem; width: auto; }
+
+/* TABS */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--borde); margin-bottom: 16px; flex-wrap: wrap; }
+.tab { padding: 8px 16px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 6px 6px 0 0; border: 1px solid transparent; border-bottom: none; color: var(--texto2); transition: all 0.15s; }
+.tab:hover { color: var(--texto); background: var(--card2); }
+.tab.active { background: var(--card2); border-color: var(--borde); border-bottom-color: var(--card2); color: var(--verde); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* SEGMENTO PILLS */
+.seg-pill { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 0.7rem; font-weight: 600; }
+.seg-primera { background: rgba(241,196,15,0.15); color: var(--primera); border: 1px solid rgba(241,196,15,0.3); }
+.seg-ascenso { background: rgba(52,152,219,0.15); color: var(--azul); border: 1px solid rgba(52,152,219,0.3); }
+.seg-basicas { background: rgba(149,165,166,0.15); color: var(--basicas); border: 1px solid rgba(149,165,166,0.3); }
+
+/* TABLA */
+.grupo-card { background: var(--card); border: 1px solid var(--borde); border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
+.grupo-titulo { padding: 10px 16px; background: var(--verde-bg); border-bottom: 2px solid var(--verde); display: flex; justify-content: space-between; align-items: center; }
+.grupo-titulo h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 2px; }
+table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+thead th { padding: 8px 6px; background: var(--card2); text-align: center; color: var(--texto2); font-size: 0.72rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid var(--borde); }
+thead th.th-nombre { text-align: left; padding-left: 12px; }
+tbody tr { border-bottom: 1px solid var(--borde); transition: background 0.1s; }
+tbody tr:hover { background: var(--card2); }
+tbody tr:last-child { border-bottom: none; }
+td { padding: 9px 6px; text-align: center; }
+td.td-nombre { text-align: left; padding-left: 12px; font-weight: 500; }
+td.td-pts { font-weight: 700; color: var(--amarillo); }
+td.td-pg { color: var(--verde); font-weight: 600; }
+td.td-pp { color: var(--rojo); }
+.mov-sube { color: var(--verde); font-weight: 700; }
+.mov-baja { color: var(--rojo); font-weight: 700; }
+.mov-queda { color: var(--texto2); }
+tr.sube-row { background: rgba(46,204,113,0.06); }
+tr.baja-row { background: rgba(231,76,60,0.06); }
+.pos-badge { display: inline-block; width: 22px; height: 22px; border-radius: 50%; text-align: center; line-height: 22px; font-size: 0.75rem; font-weight: 700; }
+.pos-1 { background: rgba(241,196,15,0.2); color: var(--primera); }
+.pos-2 { background: rgba(46,204,113,0.2); color: var(--verde); }
+.pos-3 { background: rgba(52,152,219,0.1); color: var(--texto2); }
+.pos-4 { background: rgba(231,76,60,0.1); color: var(--rojo); }
+.pos-5 { background: rgba(231,76,60,0.2); color: var(--rojo); }
+
+/* STATS BAR */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.stat-card { background: var(--card); border: 1px solid var(--borde); border-radius: 8px; padding: 10px 14px; text-align: center; }
+.stat-card .num { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; }
+.stat-card .lbl { font-size: 0.72rem; color: var(--texto2); text-transform: uppercase; letter-spacing: 1px; }
+.stat-jugado { border-top: 2px solid var(--verde); }
+.stat-wo { border-top: 2px solid var(--azul); }
+.stat-def { border-top: 2px solid var(--rojo); }
+.stat-nr { border-top: 2px solid var(--texto2); }
+.stat-total { border-top: 2px solid var(--amarillo); }
+
+/* PARTIDOS LIST */
+.partidos-filtros { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+.partidos-filtros select { background: var(--card2); border: 1px solid var(--borde); color: var(--texto); padding: 6px 10px; border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; cursor: pointer; }
+.partido-row { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-bottom: 1px solid var(--borde); font-size: 0.82rem; flex-wrap: wrap; }
+.partido-row:last-child { border-bottom: none; }
+.partido-row:hover { background: var(--card2); }
+.tipo-badge { padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; white-space: nowrap; }
+.tipo-jugado { background: rgba(46,204,113,0.15); color: var(--verde); }
+.tipo-walkover { background: rgba(52,152,219,0.15); color: var(--azul); }
+.tipo-default { background: rgba(231,76,60,0.15); color: var(--rojo); }
+.tipo-no_reportado { background: rgba(149,165,166,0.15); color: var(--texto2); }
+.partido-sets { font-family: monospace; font-size: 0.8rem; color: var(--amarillo); }
+.partido-ganador { font-weight: 600; color: var(--verde); }
+.partido-perdedor { color: var(--texto2); }
+.partido-vs { color: var(--texto2); font-size: 0.75rem; }
+.partido-grupo-tag { font-size: 0.7rem; background: var(--fondo); padding: 1px 6px; border-radius: 3px; color: var(--texto2); }
+
+/* MOVIMIENTOS */
+.mov-list { display: flex; flex-direction: column; gap: 6px; }
+.mov-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; }
+.mov-sube-item { background: rgba(46,204,113,0.08); border: 1px solid rgba(46,204,113,0.2); }
+.mov-baja-item { background: rgba(231,76,60,0.08); border: 1px solid rgba(231,76,60,0.2); }
+.mov-icon { font-size: 1.1rem; }
+.mov-nombre { font-weight: 600; flex: 1; }
+.mov-ruta { font-size: 0.75rem; color: var(--texto2); }
+
+/* RANKING */
+.ranking-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.ranking-table th { padding: 8px 10px; background: var(--card2); text-align: center; color: var(--texto2); font-size: 0.72rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; position: sticky; top: 0; }
+.ranking-table td { padding: 8px 10px; border-bottom: 1px solid var(--borde); text-align: center; }
+.ranking-table td.td-nombre { text-align: left; }
+.rank-num { font-weight: 700; color: var(--texto2); }
+.rank-1,.rank-2,.rank-3 { color: var(--primera); }
+
+/* EMPTY STATE */
+.empty { text-align: center; padding: 60px 20px; color: var(--texto2); }
+.empty .icon { font-size: 3rem; margin-bottom: 12px; }
+.empty p { font-size: 0.9rem; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--card2); border: 1px solid var(--verde); border-radius: 8px; padding: 12px 20px; font-size: 0.85rem; color: var(--verde); z-index: 999; transform: translateY(100px); opacity: 0; transition: all 0.3s; }
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.error { border-color: var(--rojo); color: var(--rojo); }
+
+/* GROUPS FILTER */
+.grupos-filter { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.grupo-chip { padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; cursor: pointer; border: 1px solid var(--borde); color: var(--texto2); background: var(--card); transition: all 0.15s; }
+.grupo-chip:hover { border-color: var(--verde); color: var(--verde); }
+.grupo-chip.active { background: var(--verde-d); border-color: var(--verde); color: var(--verde); }
+.grupo-chip.seg-primera-chip { border-color: rgba(241,196,15,0.3); }
+.grupo-chip.seg-primera-chip.active { background: rgba(241,196,15,0.15); border-color: var(--primera); color: var(--primera); }
+.grupo-chip.seg-ascenso-chip { border-color: rgba(52,152,219,0.3); }
+.grupo-chip.seg-ascenso-chip.active { background: rgba(52,152,219,0.15); border-color: var(--azul); color: var(--azul); }
+.grupo-chip.seg-basicas-chip { border-color: rgba(149,165,166,0.3); }
+.grupo-chip.seg-basicas-chip.active { background: rgba(149,165,166,0.15); border-color: var(--basicas); color: var(--basicas); }
+
+.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: currentColor; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 6px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { border-right: none; border-bottom: 1px solid var(--borde); }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>🎾 MEGA VARONIL 2026</h1>
+    <div class="sub">Simulador de Prueba · Algoritmo de Ascenso/Descenso</div>
+</div>
+
+<div class="layout">
+
+<!-- ── SIDEBAR ── -->
+<div class="sidebar">
+
+    <div class="panel">
+        <div class="panel-header">⚙️ Configuración</div>
+        <div class="panel-body">
+            <div class="slider-group">
+                <div class="slider-row">
+                    <div class="slider-label">
+                        <span>🎾 Partidos jugados</span>
+                        <span class="val val-jugado" id="v-jugado">70%</span>
+                    </div>
+                    <input type="range" id="sl-jugado" min="0" max="100" value="70">
+                </div>
+                <div class="slider-row">
+                    <div class="slider-label">
+                        <span>🚶 Walkover</span>
+                        <span class="val val-walkover" id="v-walkover">10%</span>
+                    </div>
+                    <input type="range" id="sl-walkover" min="0" max="100" value="10">
+                </div>
+                <div class="slider-row">
+                    <div class="slider-label">
+                        <span>🚫 Default</span>
+                        <span class="val val-default" id="v-default">10%</span>
+                    </div>
+                    <input type="range" id="sl-default" min="0" max="100" value="10">
+                </div>
+                <div class="slider-row">
+                    <div class="slider-label">
+                        <span>❓ No reportado</span>
+                        <span class="val val-no_reportado" id="v-nr">10%</span>
+                    </div>
+                    <input type="range" id="sl-no-reportado" min="0" max="100" value="10">
+                </div>
+                <div class="total-bar">
+                    <div class="total-seg seg-jugado" id="bar-jugado" style="width:70%"></div>
+                    <div class="total-seg seg-walkover" id="bar-walkover" style="width:10%"></div>
+                    <div class="total-seg seg-default" id="bar-default" style="width:10%"></div>
+                    <div class="total-seg seg-nr" id="bar-nr" style="width:10%"></div>
+                </div>
+            </div>
+
+            <div style="margin-top:14px; border-top:1px solid var(--borde); padding-top:12px;">
+                <div class="num-row">
+                    <label>Jugadores que suben</label>
+                    <input type="number" id="inp-suben" value="2" min="1" max="2">
+                </div>
+                <div class="num-row" style="margin-top:8px">
+                    <label>Jugadores que bajan</label>
+                    <input type="number" id="inp-bajan" value="2" min="1" max="2">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn btn-primary" id="btn-simular">🎲 Simular mes completo</button>
+    <button class="btn btn-warning" id="btn-movimientos" disabled>⬆⬇ Aplicar ascenso/descenso</button>
+    <button class="btn btn-secondary" id="btn-reset">🔄 Resetear todo</button>
+
+    <div class="panel" id="panel-resumen" style="display:none">
+        <div class="panel-header">📊 Resumen simulación</div>
+        <div class="panel-body" id="resumen-body" style="font-size:0.82rem; display:flex; flex-direction:column; gap:6px;"></div>
+    </div>
+
+</div>
+
+<!-- ── MAIN ── -->
+<div class="main">
+
+    <div class="tabs">
+        <div class="tab active" data-tab="tabla">📊 Tablas</div>
+        <div class="tab" data-tab="partidos">🎾 Partidos</div>
+        <div class="tab" data-tab="movimientos">⬆⬇ Movimientos</div>
+        <div class="tab" data-tab="ranking">🏆 Ranking Global</div>
+        <div class="tab" data-tab="post">🔮 Próximo mes</div>
+    </div>
+
+    <!-- TAB: TABLAS -->
+    <div class="tab-content active" id="tab-tabla">
+        <div id="stats-bar"></div>
+        <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; align-items:center;">
+            <button class="btn btn-sm btn-secondary" id="btn-todos" onclick="filtrarGrupos('todos')">Todos</button>
+            <button class="btn btn-sm" style="background:rgba(241,196,15,0.1);border:1px solid var(--primera);color:var(--primera)" onclick="filtrarGrupos('primera')">Primera División</button>
+            <button class="btn btn-sm" style="background:rgba(52,152,219,0.1);border:1px solid var(--azul);color:var(--azul)" onclick="filtrarGrupos('ascenso')">Liga de Ascenso</button>
+            <button class="btn btn-sm" style="background:rgba(149,165,166,0.1);border:1px solid var(--basicas);color:var(--basicas)" onclick="filtrarGrupos('basicas')">Fuerzas Básicas</button>
+        </div>
+        <div id="grupos-container">
+            <div class="empty"><div class="icon">🎾</div><p>Configura y corre la simulación para ver los resultados</p></div>
+        </div>
+    </div>
+
+    <!-- TAB: PARTIDOS -->
+    <div class="tab-content" id="tab-partidos">
+        <div class="partidos-filtros">
+            <select id="fil-grupo-partidos"><option value="">Todos los grupos</option></select>
+            <select id="fil-tipo-partidos">
+                <option value="">Todos los tipos</option>
+                <option value="jugado">🎾 Jugado</option>
+                <option value="walkover">🚶 Walkover</option>
+                <option value="default">🚫 Default</option>
+                <option value="no_reportado">❓ No reportado</option>
+            </select>
+            <span id="partidos-count" style="font-size:0.8rem; color:var(--texto2); margin-left:auto;"></span>
+        </div>
+        <div class="panel">
+            <div id="partidos-lista" style="max-height:600px; overflow-y:auto;">
+                <div class="empty"><div class="icon">🎾</div><p>Corre la simulación primero</p></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB: MOVIMIENTOS -->
+    <div class="tab-content" id="tab-movimientos">
+        <div id="movimientos-container">
+            <div class="empty"><div class="icon">⬆⬇</div><p>Corre la simulación y luego aplica los movimientos</p></div>
+        </div>
+    </div>
+
+    <!-- TAB: RANKING GLOBAL -->
+    <div class="tab-content" id="tab-ranking">
+        <div id="ranking-container">
+            <div class="empty"><div class="icon">🏆</div><p>Corre la simulación para ver el ranking global</p></div>
+        </div>
+    </div>
+
+    <!-- TAB: PRÓXIMO MES -->
+    <div class="tab-content" id="tab-post">
+        <div id="post-container">
+            <div class="empty"><div class="icon">🔮</div><p>Aplica los movimientos para ver cómo quedarán los grupos el próximo mes</p></div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Estado global ──
+let estadoSim = null
+let grupoFiltro = 'todos'
+let tieneMovimientos = false
+
+// ── Tabs ──
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'))
+        tab.classList.add('active')
+        document.getElementById('tab-' + tab.dataset.tab).classList.add('active')
+    })
+})
+
+// ── Sliders ──
+const sliders = {
+    jugado: document.getElementById('sl-jugado'),
+    walkover: document.getElementById('sl-walkover'),
+    default: document.getElementById('sl-default'),
+    nr: document.getElementById('sl-no-reportado'),
+}
+function actualizarSliders() {
+    const vals = {
+        jugado: parseInt(sliders.jugado.value),
+        walkover: parseInt(sliders.walkover.value),
+        default: parseInt(sliders.default.value),
+        nr: parseInt(sliders.nr.value),
+    }
+    const total = vals.jugado + vals.walkover + vals.default + vals.nr || 1
+    document.getElementById('v-jugado').textContent = vals.jugado + '%'
+    document.getElementById('v-walkover').textContent = vals.walkover + '%'
+    document.getElementById('v-default').textContent = vals.default + '%'
+    document.getElementById('v-nr').textContent = vals.nr + '%'
+    document.getElementById('bar-jugado').style.width = (vals.jugado / total * 100) + '%'
+    document.getElementById('bar-walkover').style.width = (vals.walkover / total * 100) + '%'
+    document.getElementById('bar-default').style.width = (vals.default / total * 100) + '%'
+    document.getElementById('bar-nr').style.width = (vals.nr / total * 100) + '%'
+}
+Object.values(sliders).forEach(s => s.addEventListener('input', actualizarSliders))
+
+// ── Toast ──
+function toast(msg, tipo = 'ok') {
+    const el = document.getElementById('toast')
+    el.textContent = msg
+    el.className = 'toast show' + (tipo === 'error' ? ' error' : '')
+    setTimeout(() => el.className = 'toast', 3000)
+}
+
+// ── Simular ──
+document.getElementById('btn-simular').addEventListener('click', async () => {
+    const btn = document.getElementById('btn-simular')
+    btn.disabled = true
+    btn.innerHTML = '<span class="spinner"></span> Simulando...'
+
+    const config = {
+        pct_jugado:       parseInt(sliders.jugado.value),
+        pct_walkover:     parseInt(sliders.walkover.value),
+        pct_default:      parseInt(sliders.default.value),
+        pct_no_reportado: parseInt(sliders.nr.value),
+        suben: parseInt(document.getElementById('inp-suben').value),
+        bajan: parseInt(document.getElementById('inp-bajan').value),
+    }
+
+    try {
+        const res = await fetch('/api/simular', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(config) })
+        const data = await res.json()
+        estadoSim = data
+        tieneMovimientos = false
+        document.getElementById('btn-movimientos').disabled = false
+
+        // Mostrar resumen
+        const panel = document.getElementById('panel-resumen')
+        panel.style.display = 'block'
+        const s = data.stats
+        document.getElementById('resumen-body').innerHTML = `
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--texto2)">Total partidos</span><strong>${s.total}</strong></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--verde)">🎾 Jugados</span><strong>${s.jugados}</strong></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--azul)">🚶 Walkovers</span><strong>${s.walkovers}</strong></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--rojo)">🚫 Defaults</span><strong>${s.defaults}</strong></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--texto2)">❓ No reportados</span><strong>${s.no_reportados}</strong></div>
+        `
+
+        await Promise.all([cargarTablas(), cargarPartidos(), cargarRanking()])
+        toast('✅ Simulación completada — ' + s.total + ' partidos')
+    } catch(e) {
+        toast('Error: ' + e.message, 'error')
+    }
+
+    btn.disabled = false
+    btn.innerHTML = '🎲 Simular mes completo'
+})
+
+// ── Aplicar movimientos ──
+document.getElementById('btn-movimientos').addEventListener('click', async () => {
+    const btn = document.getElementById('btn-movimientos')
+    btn.disabled = true
+    btn.innerHTML = '<span class="spinner"></span> Calculando...'
+
+    try {
+        const res = await fetch('/api/movimientos', { method: 'POST' })
+        const data = await res.json()
+        tieneMovimientos = true
+        await Promise.all([cargarTablas(), cargarMovimientos(), cargarProximoMes()])
+
+        // Cambiar al tab de movimientos
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'))
+        document.querySelector('[data-tab="movimientos"]').classList.add('active')
+        document.getElementById('tab-movimientos').classList.add('active')
+
+        toast('✅ ' + data.movimientos.length + ' movimientos calculados')
+    } catch(e) {
+        toast('Error: ' + e.message, 'error')
+    }
+
+    btn.disabled = false
+    btn.innerHTML = '⬆⬇ Aplicar ascenso/descenso'
+})
+
+// ── Reset ──
+document.getElementById('btn-reset').addEventListener('click', async () => {
+    await fetch('/api/simular', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({pct_jugado:0,pct_walkover:0,pct_default:0,pct_no_reportado:0}) })
+    estadoSim = null
+    tieneMovimientos = false
+    document.getElementById('btn-movimientos').disabled = true
+    document.getElementById('panel-resumen').style.display = 'none'
+    document.getElementById('grupos-container').innerHTML = '<div class="empty"><div class="icon">🎾</div><p>Configura y corre la simulación para ver los resultados</p></div>'
+    document.getElementById('partidos-lista').innerHTML = '<div class="empty"><div class="icon">🎾</div><p>Corre la simulación primero</p></div>'
+    document.getElementById('movimientos-container').innerHTML = '<div class="empty"><div class="icon">⬆⬇</div><p>Corre la simulación y luego aplica los movimientos</p></div>'
+    document.getElementById('ranking-container').innerHTML = '<div class="empty"><div class="icon">🏆</div><p>Corre la simulación para ver el ranking global</p></div>'
+    document.getElementById('post-container').innerHTML = '<div class="empty"><div class="icon">🔮</div><p>Aplica los movimientos para ver cómo quedarán los grupos el próximo mes</p></div>'
+    document.getElementById('stats-bar').innerHTML = ''
+    toast('🔄 Reseteado')
+})
+
+// ── Filtrar grupos ──
+function filtrarGrupos(seg) {
+    grupoFiltro = seg
+    cargarTablas()
+}
+
+// ── Cargar tablas ──
+async function cargarTablas() {
+    const res = await fetch('/api/tabla')
+    const data = await res.json()
+    if (!data.grupos.length) return
+
+    // Stats bar
+    const stats = calcularStats(data)
+    document.getElementById('stats-bar').innerHTML = `
+        <div class="stats-grid">
+            <div class="stat-card stat-total"><div class="num" style="color:var(--amarillo)">${stats.total_jugadores}</div><div class="lbl">Jugadores</div></div>
+            <div class="stat-card stat-jugado"><div class="num" style="color:var(--verde)">${stats.total_grupos}</div><div class="lbl">Grupos</div></div>
+            <div class="stat-card stat-wo"><div class="num" style="color:var(--azul)">${stats.avg_pts.toFixed(1)}</div><div class="lbl">Pts Promedio</div></div>
+            <div class="stat-card stat-def"><div class="num" style="color:var(--rojo)">${stats.max_pts}</div><div class="lbl">Pts Máximo</div></div>
+        </div>`
+
+    // Filtrar por segmento
+    const SEG_MAP = { 'primera': 'Primera División', 'ascenso': 'Liga de Ascenso', 'basicas': 'Fuerzas Básicas' }
+    const grupos = grupoFiltro === 'todos' ? data.grupos : data.grupos.filter(g => g.segmento === SEG_MAP[grupoFiltro])
+
+    const html = grupos.map(g => renderGrupo(g)).join('')
+    document.getElementById('grupos-container').innerHTML = html || '<div class="empty"><p>No hay grupos para mostrar</p></div>'
+
+    // Actualizar filtros de partidos
+    const sel = document.getElementById('fil-grupo-partidos')
+    sel.innerHTML = '<option value="">Todos los grupos</option>'
+    data.grupos.forEach(g => {
+        sel.innerHTML += `<option value="${g.numero}">${g.nombre}</option>`
+    })
+}
+
+function renderGrupo(g) {
+    const segClass = { 'Primera División': 'seg-primera', 'Liga de Ascenso': 'seg-ascenso', 'Fuerzas Básicas': 'seg-basicas' }[g.segmento] || ''
+    const rows = g.tabla.map(j => {
+        const movClass = j.movimiento === 'sube' ? 'sube-row' : j.movimiento === 'baja' ? 'baja-row' : ''
+        const movIcon = j.movimiento === 'sube' ? '<span class="mov-sube">↑</span>' : j.movimiento === 'baja' ? '<span class="mov-baja">↓</span>' : '<span class="mov-queda">—</span>'
+        return `<tr class="${movClass}">
+            <td><span class="pos-badge pos-${j.pos}">${j.pos}</span></td>
+            <td class="td-nombre">${j.nombre}</td>
+            <td>${j.pj}</td>
+            <td class="td-pg">${j.pg}</td>
+            <td class="td-pp">${j.pp}</td>
+            <td>${j.sets_f}-${j.sets_c}</td>
+            <td>${j.dif_sets > 0 ? '+' : ''}${j.dif_sets}</td>
+            <td class="td-pts">${j.pts}</td>
+            <td>${movIcon}</td>
+        </tr>`
+    }).join('')
+
+    return `<div class="grupo-card">
+        <div class="grupo-titulo">
+            <h3>${g.nombre}</h3>
+            <span class="seg-pill ${segClass}">${g.segmento}</span>
+        </div>
+        <table>
+            <thead><tr>
+                <th>#</th><th class="th-nombre">Jugador</th>
+                <th>PJ</th><th>PG</th><th>PP</th>
+                <th>Sets</th><th>Dif</th><th>PTS</th><th></th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+        </table>
+    </div>`
+}
+
+// ── Cargar partidos ──
+async function cargarPartidos() {
+    await filtrarPartidos()
+    document.getElementById('fil-grupo-partidos').addEventListener('change', filtrarPartidos)
+    document.getElementById('fil-tipo-partidos').addEventListener('change', filtrarPartidos)
+}
+
+async function filtrarPartidos() {
+    const grupo = document.getElementById('fil-grupo-partidos').value
+    const tipo  = document.getElementById('fil-tipo-partidos').value
+    let url = '/api/partidos?'
+    if (grupo) url += `grupo=${grupo}&`
+    if (tipo)  url += `tipo=${tipo}&`
+
+    const res = await fetch(url)
+    const data = await res.json()
+    document.getElementById('partidos-count').textContent = data.total + ' partidos'
+
+    if (!data.partidos.length) {
+        document.getElementById('partidos-lista').innerHTML = '<div class="empty"><p>No hay partidos con ese filtro</p></div>'
+        return
+    }
+
+    const html = data.partidos.map(p => {
+        if (p.tipo === 'no_reportado') {
+            return `<div class="partido-row">
+                <span class="tipo-badge tipo-no_reportado">❓ N/R</span>
+                <span class="partido-grupo-tag">${p.grupo_nombre}</span>
+                <span style="color:var(--texto2)">${p.jugador_a} vs ${p.jugador_b}</span>
+                <span class="partido-sets" style="margin-left:auto">N/R</span>
+            </div>`
+        }
+        return `<div class="partido-row">
+            <span class="tipo-badge tipo-${p.tipo}">${p.tipo === 'jugado' ? '🎾' : p.tipo === 'walkover' ? '🚶' : '🚫'} ${p.tipo}</span>
+            <span class="partido-grupo-tag">${p.grupo_nombre}</span>
+            <span class="partido-ganador">${p.ganador}</span>
+            <span class="partido-vs">d.</span>
+            <span class="partido-perdedor">${p.perdedor}</span>
+            <span class="partido-sets" style="margin-left:auto">${p.sets}</span>
+        </div>`
+    }).join('')
+
+    document.getElementById('partidos-lista').innerHTML = html
+}
+
+// ── Cargar movimientos ──
+async function cargarMovimientos() {
+    const res = await fetch('/api/movimientos')
+    const data = await res.json()
+    const movs = data.movimientos
+
+    if (!movs.length) {
+        document.getElementById('movimientos-container').innerHTML = '<div class="empty"><div class="icon">⬆⬇</div><p>No hay movimientos calculados</p></div>'
+        return
+    }
+
+    const suben = movs.filter(m => m.tipo === 'sube')
+    const bajan = movs.filter(m => m.tipo === 'baja')
+
+    const renderMov = (m) => `
+        <div class="mov-item mov-${m.tipo}-item">
+            <span class="mov-icon">${m.tipo === 'sube' ? '↑' : '↓'}</span>
+            <span class="mov-nombre">${m.jugador}</span>
+            <span class="mov-ruta">${m.de_nombre} → ${m.a_nombre}</span>
+        </div>`
+
+    document.getElementById('movimientos-container').innerHTML = `
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px">
+            <div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2px;color:var(--verde);margin-bottom:10px">↑ SUBEN (${suben.length})</div>
+                <div class="mov-list">${suben.map(renderMov).join('')}</div>
+            </div>
+            <div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2px;color:var(--rojo);margin-bottom:10px">↓ BAJAN (${bajan.length})</div>
+                <div class="mov-list">${bajan.map(renderMov).join('')}</div>
+            </div>
+        </div>`
+}
+
+// ── Cargar ranking ──
+async function cargarRanking() {
+    const res = await fetch('/api/ranking')
+    const data = await res.json()
+
+    if (!data.ranking.length) return
+
+    const rows = data.ranking.map(j => {
+        const movIcon = j.movimiento === 'sube' ? '<span class="mov-sube">↑</span>' : j.movimiento === 'baja' ? '<span class="mov-baja">↓</span>' : '<span class="mov-queda">—</span>'
+        const segClass = { 'Primera División': 'seg-primera', 'Liga de Ascenso': 'seg-ascenso', 'Fuerzas Básicas': 'seg-basicas' }[j.segmento] || ''
+        return `<tr>
+            <td class="rank-num">${j.rank}</td>
+            <td class="td-nombre">${j.nombre}</td>
+            <td><span class="seg-pill ${segClass}" style="font-size:0.65rem">${j.grupo_nombre}</span></td>
+            <td>${j.pj}</td>
+            <td style="color:var(--verde);font-weight:600">${j.pg}</td>
+            <td>${j.pts > 0 ? '<span style="color:var(--amarillo);font-weight:700">' + j.pts + '</span>' : '<span style="color:var(--rojo)">' + j.pts + '</span>'}</td>
+            <td>${movIcon}</td>
+        </tr>`
+    }).join('')
+
+    document.getElementById('ranking-container').innerHTML = `
+        <div style="overflow-x:auto">
+            <table class="ranking-table">
+                <thead><tr>
+                    <th>#</th><th style="text-align:left">Jugador</th>
+                    <th>Grupo</th><th>PJ</th><th>PG</th><th>PTS</th><th></th>
+                </tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </div>`
+}
+
+// ── Próximo mes ──
+async function cargarProximoMes() {
+    const res = await fetch('/api/tabla-post')
+    const data = await res.json()
+    if (!data.grupos.length) return
+
+    const segmentos = {
+        'Primera División': data.grupos.filter(g => [1,2,3,4,5,6,7].includes(g.numero)),
+        'Liga de Ascenso':  data.grupos.filter(g => [8,9,10,11,12,13,14].includes(g.numero)),
+        'Fuerzas Básicas':  data.grupos.filter(g => [15,16,17,18,19,20].includes(g.numero)),
+    }
+
+    const segColors = { 'Primera División': 'var(--primera)', 'Liga de Ascenso': 'var(--azul)', 'Fuerzas Básicas': 'var(--basicas)' }
+
+    let html = '<p style="color:var(--texto2);font-size:0.85rem;margin-bottom:16px">Composición de grupos para el siguiente mes tras aplicar ascensos y descensos. Puntos reiniciados a cero.</p>'
+
+    for (const [seg, grupos] of Object.entries(segmentos)) {
+        if (!grupos.length) continue
+        html += `<div style="margin-bottom:24px">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:3px;color:${segColors[seg]};border-bottom:1px solid var(--borde);padding-bottom:6px;margin-bottom:12px">${seg}</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px">`
+
+        for (const g of grupos) {
+            html += `<div class="grupo-card">
+                <div class="grupo-titulo"><h3 style="font-size:0.95rem">${g.nombre}</h3></div>
+                <div style="padding:8px 12px">`
+            g.jugadores.forEach((j, i) => {
+                html += `<div style="padding:5px 0;border-bottom:1px solid var(--borde);font-size:0.82rem;display:flex;align-items:center;gap:6px">
+                    <span style="color:var(--texto2);width:16px;font-size:0.72rem">${i+1}</span>
+                    ${j}
+                </div>`
+            })
+            html += `</div></div>`
+        }
+        html += `</div></div>`
+    }
+
+    document.getElementById('post-container').innerHTML = html
+}
+
+// ── Helpers ──
+function calcularStats(data) {
+    let total_jugadores = 0, total_pts = 0, max_pts = 0
+    data.grupos.forEach(g => {
+        g.tabla.forEach(j => {
+            total_jugadores++
+            total_pts += j.pts
+            if (j.pts > max_pts) max_pts = j.pts
+        })
+    })
+    return { total_jugadores, total_grupos: data.grupos.length, avg_pts: total_pts / (total_jugadores || 1), max_pts }
+}
+</script>
+
+</body>
+</html>
